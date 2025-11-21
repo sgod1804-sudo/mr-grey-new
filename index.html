@@ -488,33 +488,37 @@ document.getElementById('orderForm').addEventListener('submit', function(e) {
         timestamp: new Date().toLocaleString('uk-UA')
     };
     
-    // Отправляем в Google Apps Script
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbwkc0Jp1-tlJD5XdFCkUu1uqVoS-XPAkBHXDu3dNSeq38FcII8x9knLbGDlc3naHPGb/exec';
+    // Отправляем в Telegram
+    const telegramMessage = `
+🆕 НОВАЯ ЗАЯВКА
+──────────────
+👤 ФИО: ${formData.fullName}
+📞 Телефон: ${formData.phone}
+📧 Email: ${formData.email}
+📱 Telegram: ${formData.telegram}
+🎓 Курс: ${formData.course}
+💰 Цена: ${formData.price} грн
+🕐 Дата: ${formData.timestamp}
+    `;
     
-    // Подготавливаем данные для отправки
-    const formDataEncoded = new URLSearchParams();
-    for (const key in formData) {
-        formDataEncoded.append(key, formData[key]);
-    }
-    
-    // Отправка данных
-    fetch(scriptURL, {
+    // Отправка в Telegram
+    fetch(`https://api.telegram.org/bot8318808737:AAHr5TRgDJWbzYbNxv1nMy3zhAEH5W9_XgQ/sendMessage`, {
         method: 'POST',
-        body: formDataEncoded
-    }).then(response => {
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            chat_id: 1700615936,
+            text: telegramMessage,
+            parse_mode: 'HTML'
+        })
+    }).then(() => {
         // Успешное сообщение
         loading.style.display = 'none';
         successMessage.style.display = 'block';
         
         // Логируем в консоль для подстраховки
-        console.log('📋 ДАННЫЕ ЗАЯВКИ:');
-        console.log('ФИО:', formData.fullName);
-        console.log('Телефон:', formData.phone);
-        console.log('Email:', formData.email);
-        console.log('Telegram:', formData.telegram);
-        console.log('Курс:', formData.course);
-        console.log('Цена:', formData.price);
-        console.log('Дата:', formData.timestamp);
+        console.log('📋 ДАННЫЕ ЗАЯВКИ:', formData);
         
         // Перенаправляем в Monobank через 2 секунды
         setTimeout(() => {
