@@ -465,87 +465,81 @@
         }
 
         // Обработка отправки формы
-        document.getElementById('orderForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const submitButton = document.getElementById('submitButton');
-            const loading = document.getElementById('loading');
-            const successMessage = document.getElementById('successMessage');
-            
-            // Показываем загрузку
-            submitButton.disabled = true;
-            loading.style.display = 'block';
-            successMessage.style.display = 'none';
-            
-            // Собираем данные формы
-            const formData = {
-                fullName: document.getElementById('fullName').value,
-                phone: document.getElementById('phone').value,
-                email: document.getElementById('email').value,
-                telegram: document.getElementById('telegram').value,
-                course: currentCourse,
-                price: currentPrice,
-                timestamp: new Date().toLocaleString('uk-UA')
-            };
-            
-            // Отправляем в Google Формы
-            const formDataEncoded = new URLSearchParams();
-            
-            // КОДЫ ПОЛЕЙ:
-            formDataEncoded.append('entry.1299727166', formData.fullName);     // ФИО
-            formDataEncoded.append('entry.1751079876', formData.phone);       // Телефон
-            formDataEncoded.append('entry.487524639', formData.email);        // Email
-            formDataEncoded.append('entry.1037897951', formData.telegram);    // Telegram
-            formDataEncoded.append('entry.1086957699', formData.course);      // Курс
-            formDataEncoded.append('entry.1874554402', formData.price);       // Цена
-            
-            // Отправка данных в Google Формы
-            fetch('https://docs.google.com/forms/d/e/1FAIpQLScM39MfXyENGKz0FZZ7A-WXDQ0oz3OjG8f3YCmr8INSeqUuNg/formResponse', {
-                method: 'POST',
-                body: formDataEncoded,
-                mode: 'no-cors'
-            }).then(() => {
-                // Успешное сообщение
-                loading.style.display = 'none';
-                successMessage.style.display = 'block';
-                
-                // Логируем в консоль для подстраховки
-                console.log('📋 ДАННЫЕ ЗАЯВКИ:');
-                console.log('ФИО:', formData.fullName);
-                console.log('Телефон:', formData.phone);
-                console.log('Email:', formData.email);
-                console.log('Telegram:', formData.telegram);
-                console.log('Курс:', formData.course);
-                console.log('Цена:', formData.price);
-                console.log('Дата:', formData.timestamp);
-                
-                // Перенаправляем в Monobank через 2 секунды
-                setTimeout(() => {
-                    window.open('https://send.monobank.ua/jar/3YKPCthpJk', '_blank');
-                    closeOrderForm();
-                }, 2000);
-            }).catch(error => {
-                console.error('Ошибка:', error);
-                loading.style.display = 'none';
-                alert('Ошибка отправки формы. Пожалуйста, попробуйте еще раз.');
-                submitButton.disabled = false;
-            });
-        });
+document.getElementById('orderForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const submitButton = document.getElementById('submitButton');
+    const loading = document.getElementById('loading');
+    const successMessage = document.getElementById('successMessage');
+    
+    // Показываем загрузку
+    submitButton.disabled = true;
+    loading.style.display = 'block';
+    successMessage.style.display = 'none';
+    
+    // Собираем данные формы
+    const formData = {
+        fullName: document.getElementById('fullName').value,
+        phone: document.getElementById('phone').value,
+        email: document.getElementById('email').value,
+        telegram: document.getElementById('telegram').value,
+        course: currentCourse,
+        price: currentPrice,
+        timestamp: new Date().toLocaleString('uk-UA')
+    };
+    
+    // Отправляем в Google Apps Script
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbwkc0Jp1-tlJD5XdFCkUu1uqVoS-XPAkBHXDu3dNSeq38FcII8x9knLbGDlc3naHPGb/exec';
+    
+    // Подготавливаем данные для отправки
+    const formDataEncoded = new URLSearchParams();
+    for (const key in formData) {
+        formDataEncoded.append(key, formData[key]);
+    }
+    
+    // Отправка данных
+    fetch(scriptURL, {
+        method: 'POST',
+        body: formDataEncoded
+    }).then(response => {
+        // Успешное сообщение
+        loading.style.display = 'none';
+        successMessage.style.display = 'block';
+        
+        // Логируем в консоль для подстраховки
+        console.log('📋 ДАННЫЕ ЗАЯВКИ:');
+        console.log('ФИО:', formData.fullName);
+        console.log('Телефон:', formData.phone);
+        console.log('Email:', formData.email);
+        console.log('Telegram:', formData.telegram);
+        console.log('Курс:', formData.course);
+        console.log('Цена:', formData.price);
+        console.log('Дата:', formData.timestamp);
+        
+        // Перенаправляем в Monobank через 2 секунды
+        setTimeout(() => {
+            window.open('https://send.monobank.ua/jar/3YKPCthpJk', '_blank');
+            closeOrderForm();
+        }, 2000);
+    }).catch(error => {
+        console.error('Ошибка:', error);
+        loading.style.display = 'none';
+        alert('Ошибка отправки формы. Пожалуйста, попробуйте еще раз.');
+        submitButton.disabled = false;
+    });
+});
 
-        // Закрытие модального окна при клике вне его
-        window.onclick = function(event) {
-            const modal = document.getElementById('orderModal');
-            if (event.target === modal) {
-                closeOrderForm();
-            }
-        }
+// Закрытие модального окна при клике вне его
+window.onclick = function(event) {
+    const modal = document.getElementById('orderModal');
+    if (event.target === modal) {
+        closeOrderForm();
+    }
+}
 
-        // Закрытие модального окна по ESC
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') {
-                closeOrderForm();
-            }
-        });
-    </script>
-</body>
-</html>
+// Закрытие модального окна по ESC
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeOrderForm();
+    }
+});
